@@ -1,4 +1,4 @@
-module main
+module newsBot
 
 go 1.19
 

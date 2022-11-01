@@ -1,7 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"newsBot/bot"
+	"newsBot/config"
+)
 
 func main() {
-	fmt.Println("Hello world")
+	err := config.ReadConfing()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	bot.Start()
+
+	<-make(chan struct{})
 }
