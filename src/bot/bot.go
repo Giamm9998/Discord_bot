@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"newsBot/config"
+	"newsBot/crawler"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/robfig/cron/v3"
@@ -11,9 +12,6 @@ import (
 
 var BotID string
 var bot *discordgo.Session
-
-const CHANNEL_ID = "1037036075304099843"
-const N_SEC = "3"
 
 func Start() {
 	bot, BotID = initDiscordBot()
@@ -32,11 +30,9 @@ func Start() {
 func initCronjJob(bot *discordgo.Session) *cron.Cron {
 	c := cron.New()
 
-	//This function must be substuted with the scheduled one that we want to execute
-	sendMessage := func() {
-		bot.ChannelMessageSend(CHANNEL_ID, "Hi!")
-	}
-	c.AddFunc("@every "+N_SEC+"s", sendMessage)
+	crawler := crawler.NewCrawler(bot)
+
+	c.AddFunc(crawler.Schedule, crawler.CronWork)
 	return c
 }
 
