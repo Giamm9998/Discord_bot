@@ -7,11 +7,14 @@ import (
 )
 
 func main() {
-	err := config.ReadConfing()
+	err := config.ReadConfig()
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 	bot.Start()
 
+	/*
+		TODO to understand and document
+	*/
 	<-make(chan struct{})
 }

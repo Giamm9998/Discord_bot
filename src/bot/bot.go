@@ -10,40 +10,37 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-var BotID string
 var bot *discordgo.Session
 
 func Start() {
-	bot, BotID = initDiscordBot()
+	bot = initDiscordBot()
 
-	c := initCronjJob(bot)
+	c := initCronJob(bot)
 	c.Start()
 	defer c.Stop()
 
 	fmt.Println("Bot is running!")
 
-	//why this???
+	//TODO why this???
 	select {}
-
 }
 
-func initCronjJob(bot *discordgo.Session) *cron.Cron {
+func initCronJob(bot *discordgo.Session) *cron.Cron {
 	c := cron.New()
 
-	crawler := crawler.NewCrawler(bot)
+	worker := crawler.NewWorker(bot)
 
-	c.AddFunc(crawler.Schedule, crawler.CronWork)
-	return c
-}
-
-func initDiscordBot() (*discordgo.Session, string) {
-	bot, err := discordgo.New("Bot " + config.Token)
+	_, err := c.AddFunc(worker.Schedule, worker.CronWork)
 	if err != nil {
 		log.Fatal(err)
 	}
+	return c
+}
 
-	u, err := bot.User("@me")
+func initDiscordBot() *discordgo.Session {
+	bot, err := discordgo.New("Bot " + config.Token)
 	if err != nil {
+		// TODO log fatal error not good practice?
 		log.Fatal(err)
 	}
 
@@ -51,5 +48,5 @@ func initDiscordBot() (*discordgo.Session, string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return bot, u.ID
+	return bot
 }
