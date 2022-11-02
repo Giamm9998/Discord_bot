@@ -2,48 +2,51 @@ package bot
 
 import (
 	"fmt"
+	"log"
 	"newsBot/config"
+	"newsBot/crawler"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/robfig/cron/v3"
 )
 
-var BotID string
-var gobot *discordgo.Session
+var bot *discordgo.Session
 
 func Start() {
-	gobot, error := discordgo.New("Bot " + config.Token)
-	if error != nil {
-		fmt.Println(error.Error())
-		return
-	}
+	bot = initDiscordBot()
 
-	u, error := gobot.User("@me")
-	if error != nil {
-		fmt.Println(error.Error())
-		return
-	}
-
-	BotID = u.ID
-	gobot.AddHandler(messageHandler)
-
-	error = gobot.Open()
-	if error != nil {
-		fmt.Println(error.Error())
-		return
-	}
+	c := initCronJob(bot)
+	c.Start()
+	defer c.Stop()
 
 	fmt.Println("Bot is running!")
 
+	//TODO why this???
+	select {}
 }
 
-func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
-	// message has been sent by the bot itself, we don't do anything
-	if m.Author.ID == BotID {
-		return
+func initCronJob(bot *discordgo.Session) *cron.Cron {
+	c := cron.New()
+
+	worker := crawler.NewWorker(bot)
+
+	_, err := c.AddFunc(worker.Schedule, worker.CronWork)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return c
+}
+
+func initDiscordBot() *discordgo.Session {
+	bot, err := discordgo.New("Bot " + config.Token)
+	if err != nil {
+		// TODO log fatal error not good practice?
+		log.Fatal(err)
 	}
 
-	if m.Content == "Talk" {
-		s.ChannelMessageSend(m.ChannelID, "Hi!")
+	err = bot.Open()
+	if err != nil {
+		log.Fatal(err)
 	}
-
+	return bot
 }

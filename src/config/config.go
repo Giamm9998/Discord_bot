@@ -3,7 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 )
 
 var (
@@ -18,19 +18,18 @@ type configStruct struct {
 	BotPrefix string `json:"BotPrefix"`
 }
 
-func ReadConfing() error {
-	fmt.Println("Reading the config file")
-	file, error := ioutil.ReadFile("config.json")
-	if error != nil {
-		fmt.Println(error.Error())
-		return error
+func ReadConfig() error {
+	file, err := os.ReadFile("config.json")
+	// TODO helper function handle errors
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
 	}
-	fmt.Println(string(file))
 
-	error = json.Unmarshal(file, &config)
-	if error != nil {
-		fmt.Println(error.Error())
-		return error
+	err = json.Unmarshal(file, &config)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
 	}
 
 	Token = config.Token
