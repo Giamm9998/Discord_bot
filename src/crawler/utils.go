@@ -17,10 +17,10 @@ func StandardizeSpaces(s string) string {
 func getCVE() *discordgo.MessageEmbed {
 
 	// the assignments inside OnHTML works only with slices. Why???
-	cats := make([]string, 0)
+	// cats := make([]string, 0)
 
 	// slice 2d for the CVES
-	vals := make([][]string, 5)
+	vals := make([][]string, 3)
 	for i := range vals {
 		vals[i] = make([]string, 0)
 	}
@@ -31,12 +31,12 @@ func getCVE() *discordgo.MessageEmbed {
 
 	//TODO: improve css selectors
 	c.OnHTML("table[id=vulnslisttable]", func(e *colly.HTMLElement) {
-		e.ForEach("tbody tr th", func(_ int, category *colly.HTMLElement) {
-			// gets all the category names
-			cats = append(cats, StandardizeSpaces(category.Text))
-		})
+		// e.ForEach("tbody tr th", func(_ int, category *colly.HTMLElement) {
+		// 	// gets all the category names
+		// 	cats = append(cats, StandardizeSpaces(category.Text))
+		// })
 		e.ForEachWithBreak(".srrowns", func(r int, row *colly.HTMLElement) bool {
-			if r == 5 {
+			if r == 3 {
 				return false
 			}
 			row.ForEach("td", func(_ int, val *colly.HTMLElement) {
@@ -53,36 +53,20 @@ func getCVE() *discordgo.MessageEmbed {
 		log.Fatal(err)
 	}
 	fmt.Println("DONE!")
-	return createTable(cats, vals)
+	return createCVEembed(vals)
 }
 
-func createTable(cats []string, vals [][]string) *discordgo.MessageEmbed {
-	ascii_table := "\n+=====+===============+=========+\n| "
-	separator := "\n-------------------------------------------------\n"
-	cells := [3]string{cats[CVE_ID], cats[SCORE], cats[VULN_TYPE]}
-
-	for _, cell := range cells {
-		ascii_table += cell + " | "
-	}
-	ascii_table += "\n+=====+===============+=========+\n"
-
-	for _, row := range vals {
-		cells = [3]string{row[CVE_ID], row[SCORE], row[VULN_TYPE]}
-		for _, col := range cells {
-			ascii_table += col + " | "
-		}
-		ascii_table += separator
-	}
-	ascii_table += "\n+=====+===================+=========+"
-
-	return create_embed(ascii_table)
-}
-
-func create_embed(descrption string) *discordgo.MessageEmbed {
+func createCVEembed(vals [][]string) *discordgo.MessageEmbed {
 	embd := embed.NewEmbed()
 	embd.SetImage(CVE_LOGO_URL)
 	embd.SetTitle("CVEs")
-	embd.SetDescription(descrption)
+	embd.SetDescription("Recent CVEs with score >=3")
 	embd.SetThumbnail(CVE_THUMBNAIL_URL)
+	embd.SetColor(0xffff00)
+	for _, cve := range vals {
+		field_title := cve[CVE_ID]
+		field_desc := "Vuln type: " + cve[VULN_TYPE] + "\nScore: " + cve[SCORE] + "\n[link](https://www.youtube.com/watch?v=dQw4w9WgXcQ)"
+		embd.AddField(field_title, field_desc)
+	}
 	return embd.MessageEmbed
 }

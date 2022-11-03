@@ -12,9 +12,11 @@ const (
 
 const (
 	CVE_ID    = 1
-	SCORE     = 4
-	VULN_TYPE = 7
+	VULN_TYPE = 4
+	SCORE     = 7
 )
+
+const FIELDS_NUMBER = 3
 
 // decide score of the CVE
 const CVSSSCOREMIN = "3"
