@@ -1,8 +1,9 @@
 package crawler
 
 import (
-	"github.com/bwmarrin/discordgo"
 	"log"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 const SCHEDULE = "@every 3s"
@@ -18,7 +19,8 @@ func NewWorker(bot *discordgo.Session) *Worker {
 		Schedule: SCHEDULE,
 		CronWork: func() {
 			//TODO add search here
-			_, err := bot.ChannelMessageSend(CHANNEL_ID, "Hi!")
+			var msg *discordgo.MessageEmbed = getCVE()
+			_, err := bot.ChannelMessageSendEmbed(CHANNEL_ID, msg)
 			if err != nil {
 				log.Fatal(err)
 			}
