@@ -3,6 +3,8 @@ package crawler
 // Sorting order of the CVEs
 type order string
 
+const DOMAIN = "https://www.cvedetails.com/"
+
 const (
 	CVE_NUMBER_DES order = "1"
 	CVE_NUMBER_AS        = "2"

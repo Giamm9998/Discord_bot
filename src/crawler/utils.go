@@ -26,7 +26,7 @@ func getCVE() *discordgo.MessageEmbed {
 	}
 
 	c := colly.NewCollector(
-		colly.AllowedDomains("www.cvedetails.com", "cvedetails.com"),
+		colly.AllowedDomains("www.cvedetails.com", "cvedetails.com", DOMAIN),
 	)
 
 	//TODO: improve css selectors
@@ -35,12 +35,16 @@ func getCVE() *discordgo.MessageEmbed {
 		// 	// gets all the category names
 		// 	cats = append(cats, StandardizeSpaces(category.Text))
 		// })
+		//TODO: take only recent Weekly/Daily CVE
 		e.ForEachWithBreak(".srrowns", func(r int, row *colly.HTMLElement) bool {
 			if r == 3 {
 				return false
 			}
 			row.ForEach("td", func(_ int, val *colly.HTMLElement) {
 				vals[r] = append(vals[r], StandardizeSpaces(val.Text))
+			})
+			row.ForEach("td[nowrap]", func(_ int, el *colly.HTMLElement) {
+				vals[r] = append(vals[r], el.ChildAttr("a", "href"))
 			})
 			return true
 		})
@@ -65,7 +69,7 @@ func createCVEembed(vals [][]string) *discordgo.MessageEmbed {
 	embd.SetColor(0xffff00)
 	for _, cve := range vals {
 		field_title := cve[CVE_ID]
-		field_desc := "Vuln type: " + cve[VULN_TYPE] + "\nScore: " + cve[SCORE] + "\n[link](https://www.youtube.com/watch?v=dQw4w9WgXcQ)"
+		field_desc := ":lady_beetle: Vuln type: " + cve[VULN_TYPE] + "\n:scales: Score: " + cve[SCORE] + "\n:link: [link](" + DOMAIN + cve[len(cve)-1] + ")"
 		embd.AddField(field_title, field_desc)
 	}
 	return embd.MessageEmbed
