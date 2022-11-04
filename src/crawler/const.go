@@ -16,6 +16,7 @@ const (
 	CVE_ID    = 1
 	VULN_TYPE = 4
 	SCORE     = 7
+	LINK      = 15
 )
 
 const FIELDS_NUMBER = 3

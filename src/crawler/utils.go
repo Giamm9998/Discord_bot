@@ -3,6 +3,7 @@ package crawler
 import (
 	"fmt"
 	"log"
+	"newsBot/db"
 	"strings"
 
 	embed "github.com/Clinet/discordgo-embed"
@@ -17,7 +18,6 @@ func StandardizeSpaces(s string) string {
 func getCVE() *discordgo.MessageEmbed {
 
 	// the assignments inside OnHTML works only with slices. Why???
-	// cats := make([]string, 0)
 
 	// slice 2d for the CVES
 	values := make([][]string, 3)
@@ -26,15 +26,10 @@ func getCVE() *discordgo.MessageEmbed {
 	}
 
 	c := colly.NewCollector(
-		colly.AllowedDomains("www"+DOMAIN, "https://www."+DOMAIN, DOMAIN),
+		colly.AllowedDomains("www."+DOMAIN, "https://www."+DOMAIN, DOMAIN),
 	)
 
-	//TODO: improve css selectors
 	c.OnHTML("table[id=vulnslisttable]", func(e *colly.HTMLElement) {
-		// e.ForEach("tbody tr th", func(_ int, category *colly.HTMLElement) {
-		// 	// gets all the category names
-		// 	cats = append(cats, StandardizeSpaces(category.Text))
-		// })
 		//TODO: take only recent Weekly/Daily CVE
 		e.ForEachWithBreak(".srrowns", func(r int, row *colly.HTMLElement) bool {
 			if r == 3 {
@@ -57,6 +52,16 @@ func getCVE() *discordgo.MessageEmbed {
 		log.Fatal(err)
 	}
 	fmt.Println("DONE!")
+
+	cveData := [][4]string{}
+	for _, v := range values {
+		cveData = append(cveData, [4]string{v[CVE_ID], v[VULN_TYPE], v[SCORE], "https://www." + DOMAIN + v[LINK]})
+	}
+
+	db.Connect()
+	db.Write_CVE(cveData)
+	db.Disconnect()
+
 	return createCVEembed(values)
 }
 
