@@ -18,8 +18,7 @@ func NewWorker(bot *discordgo.Session) *Worker {
 	return &Worker{
 		Schedule: SCHEDULE,
 		CronWork: func() {
-			//TODO add search here
-			var msg *discordgo.MessageEmbed = getCVE()
+			var msg = getCVE()
 			_, err := bot.ChannelMessageSendEmbed(CHANNEL_ID, msg)
 			if err != nil {
 				log.Fatal(err)

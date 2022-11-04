@@ -20,13 +20,13 @@ func getCVE() *discordgo.MessageEmbed {
 	// cats := make([]string, 0)
 
 	// slice 2d for the CVES
-	vals := make([][]string, 3)
-	for i := range vals {
-		vals[i] = make([]string, 0)
+	values := make([][]string, 3)
+	for i := range values {
+		values[i] = make([]string, 0)
 	}
 
 	c := colly.NewCollector(
-		colly.AllowedDomains("www.cvedetails.com", "cvedetails.com", DOMAIN),
+		colly.AllowedDomains("www"+DOMAIN, "https://www."+DOMAIN, DOMAIN),
 	)
 
 	//TODO: improve css selectors
@@ -41,10 +41,10 @@ func getCVE() *discordgo.MessageEmbed {
 				return false
 			}
 			row.ForEach("td", func(_ int, val *colly.HTMLElement) {
-				vals[r] = append(vals[r], StandardizeSpaces(val.Text))
+				values[r] = append(values[r], StandardizeSpaces(val.Text))
 			})
 			row.ForEach("td[nowrap]", func(_ int, el *colly.HTMLElement) {
-				vals[r] = append(vals[r], el.ChildAttr("a", "href"))
+				values[r] = append(values[r], el.ChildAttr("a", "href"))
 			})
 			return true
 		})
@@ -57,20 +57,20 @@ func getCVE() *discordgo.MessageEmbed {
 		log.Fatal(err)
 	}
 	fmt.Println("DONE!")
-	return createCVEembed(vals)
+	return createCVEembed(values)
 }
 
 func createCVEembed(vals [][]string) *discordgo.MessageEmbed {
-	embd := embed.NewEmbed()
-	embd.SetImage(CVE_LOGO_URL)
-	embd.SetTitle("CVEs")
-	embd.SetDescription("Recent CVEs with score >=3")
-	embd.SetThumbnail(CVE_THUMBNAIL_URL)
-	embd.SetColor(0xffff00)
+	message := embed.NewEmbed()
+	message.SetImage(CVE_LOGO_URL)
+	message.SetTitle("CVEs")
+	message.SetDescription("Recent CVEs with score >=3")
+	message.SetThumbnail(CVE_THUMBNAIL_URL)
+	message.SetColor(0xffff00)
 	for _, cve := range vals {
-		field_title := cve[CVE_ID]
-		field_desc := ":lady_beetle: Vuln type: " + cve[VULN_TYPE] + "\n:scales: Score: " + cve[SCORE] + "\n:link: [link](" + DOMAIN + cve[len(cve)-1] + ")"
-		embd.AddField(field_title, field_desc)
+		fieldTitle := cve[CVE_ID]
+		fieldDesc := ":lady_beetle: Vuln type: " + cve[VULN_TYPE] + "\n:scales: Score: " + cve[SCORE] + "\n:link: [link](" + DOMAIN + cve[len(cve)-1] + ")"
+		message.AddField(fieldTitle, fieldDesc)
 	}
-	return embd.MessageEmbed
+	return message.MessageEmbed
 }
