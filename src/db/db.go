@@ -34,13 +34,15 @@ func Disconnect() {
 
 func Write_CVE(cveData [][4]string) {
 	coll := client.Database("News").Collection("CVEs")
-	cves := []interface{}{}
+	// We use update with option Upsert=true so the document is created only if it doesn't exist
 	for _, cve := range cveData {
-		cves = append(cves, bson.D{{Key: "id", Value: cve[0]}, {Key: "vuln", Value: cve[1]}, {Key: "score", Value: cve[2]}, {Key: "link", Value: cve[3]}})
+		update := bson.D{{Key: "$set", Value: bson.D{{Key: "id", Value: cve[0]}, {Key: "vuln", Value: cve[1]}, {Key: "score", Value: cve[2]}, {Key: "link", Value: cve[3]}}}}
+		filter := bson.D{{Key: "id", Value: cve[0]}}
+		opts := options.Update().SetUpsert(true)
+		result, err := coll.UpdateOne(context.TODO(), filter, update, opts)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(result)
 	}
-	result, err := coll.InsertMany(context.TODO(), cves)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(result)
 }

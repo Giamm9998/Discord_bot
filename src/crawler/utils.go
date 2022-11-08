@@ -17,7 +17,6 @@ func StandardizeSpaces(s string) string {
 }
 
 func getCVE() *discordgo.MessageEmbed {
-
 	// the assignments inside OnHTML works only with slices. Why???
 
 	// slice 2d for the CVES
@@ -63,7 +62,6 @@ func getCVE() *discordgo.MessageEmbed {
 		cveData = append(cveData, [4]string{v[CVE_ID], strings.Replace(v[VULN_TYPE], v[CVE_ID]+" - ", "", 1), v[SCOREv2], "https://" + DOMAIN + v[LINK]})
 	}
 
-	fmt.Println(values[1])
 	db.Connect()
 	db.Write_CVE(cveData)
 	db.Disconnect()
