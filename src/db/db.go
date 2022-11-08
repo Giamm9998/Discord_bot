@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -39,10 +38,9 @@ func Write_CVE(cveData [][4]string) {
 		update := bson.D{{Key: "$set", Value: bson.D{{Key: "id", Value: cve[0]}, {Key: "vuln", Value: cve[1]}, {Key: "score", Value: cve[2]}, {Key: "link", Value: cve[3]}}}}
 		filter := bson.D{{Key: "id", Value: cve[0]}}
 		opts := options.Update().SetUpsert(true)
-		result, err := coll.UpdateOne(context.TODO(), filter, update, opts)
+		_, err := coll.UpdateOne(context.TODO(), filter, update, opts)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(result)
 	}
 }
