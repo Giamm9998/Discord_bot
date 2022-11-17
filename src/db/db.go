@@ -31,7 +31,7 @@ func Disconnect() {
 	client = nil
 }
 
-func Write_CVE(cveData [][4]string) {
+func WriteCVE(cveData [][4]string) {
 	coll := client.Database("News").Collection("CVEs")
 	// We use update with option Upsert=true so the document is created only if it doesn't exist
 	for _, cve := range cveData {
@@ -44,3 +44,5 @@ func Write_CVE(cveData [][4]string) {
 		}
 	}
 }
+
+//TODO: implement writeNews

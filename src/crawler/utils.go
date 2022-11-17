@@ -63,7 +63,7 @@ func getCVE() *discordgo.MessageEmbed {
 	}
 
 	db.Connect()
-	db.Write_CVE(cveData)
+	db.WriteCVE(cveData)
 	db.Disconnect()
 
 	return createCVEembed(values)
